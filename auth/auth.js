@@ -3,6 +3,13 @@ import { auth, db } from "../firebase-admin.js";
 import { datab } from "../firebase.js";
 import { upload_files } from "../utils/upload_aws.js";
 
+/**
+ * Registers a new user with Firebase Authentication and Firestore.
+ *
+ * @param {Object} req - The request object containing `email`, `password`, and `displayName`.
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object containing the user ID and email, or an error message.
+ */
 const register = async (req, res) => {
   const { email, password, displayName } = req.body;
   try {
@@ -46,7 +53,13 @@ const register = async (req, res) => {
   }
 };
 
-// Login User
+/**
+ * Logs in a user by verifying their ID token.
+ *
+ * @param {Object} req - The request object containing `token`.
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object containing user data, or an error message.
+ */
 const login = async (req, res) => {
   const idToken = req.body.token;
   // const refreshToken = req.body.refresh;
@@ -80,7 +93,13 @@ const login = async (req, res) => {
   }
 };
 
-// Check if logged in (token verification)
+/**
+ * Checks if a user is logged in by verifying their ID token.
+ *
+ * @param {Object} req - The request object containing the authorization header with the ID token.
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object confirming login status or an error message.
+ */
 const checkIfLogged = async (req, res) => {
   const idToken = req.headers.authorization;
 
@@ -94,7 +113,13 @@ const checkIfLogged = async (req, res) => {
   }
 };
 
-// Get User by UID
+/**
+ * Retrieves user data by UID from token.
+ *
+ * @param {Object} req - The request object containing the authorization header with the ID token.
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object containing user data or an error message.
+ */
 const getUser = async (req, res) => {
   // const { uid } = req.params;
   const idToken = req.headers.authorization;
@@ -139,6 +164,13 @@ const getUser = async (req, res) => {
   }
 };
 
+/**
+ * Refreshes an ID token using a refresh token.
+ *
+ * @param {Object} req - The request object containing `refreshToken`.
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object containing the new ID token, refresh token, and expiry time, or an error message.
+ */
 const refreshToken = async (req, res) => {
   console.log("a incercat");
   try {
@@ -151,20 +183,16 @@ const refreshToken = async (req, res) => {
         },
         body: JSON.stringify({
           grant_type: "refresh_token",
-          refresh_token: req.body.refreshToken, // Pass the refresh token here
+          refresh_token: req.body.refreshToken,
         }),
       }
     );
 
-    // if (!response.ok) {
-    //   throw new Error("Failed to refresh ID token");
-    // }
-
     const data = await response.json();
 
-    const newIdToken = data.id_token; // New ID token
-    const newRefreshToken = data.refresh_token; // Updated refresh token (save it)
-    const expiresIn = data.expires_in; // Expiry time in seconds
+    const newIdToken = data.id_token;
+    const newRefreshToken = data.refresh_token;
+    const expiresIn = data.expires_in;
     res
       .status(200)
       .json({ accessToken: newIdToken, refreshToken: newRefreshToken });
@@ -174,6 +202,13 @@ const refreshToken = async (req, res) => {
   }
 };
 
+/**
+ * Updates a user's profile data in Firestore.
+ *
+ * @param {Object} req - The request object containing `id` (user ID) and `updates` (JSON string of updates).
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object confirming the update or an error message.
+ */
 const updateUserProfile = async (req, res) => {
   const { id, updates } = req.body;
   const update_ok = JSON.parse(updates);

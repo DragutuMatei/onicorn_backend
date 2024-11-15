@@ -1,12 +1,3 @@
-/*
-add
-getall
-getbypref([nume_preferinta]) -> de gandit
-getByCreatedAt->desc
-
-
-*/
-
 import {
   addDoc,
   collection,
@@ -22,6 +13,30 @@ import {
 import { datab } from "../firebase.js";
 import { upload_files } from "../utils/upload_aws.js";
 
+
+/**
+
+Detailed Function Overview
+
+ - addProject: Adds a project with all required metadata and uploads associated files to storage.
+
+ - updateProject: Updates project properties and file attachments, preserving nested team structures.
+
+ - deleteProject: Removes a project from the database by its ID.
+
+ - addToWatchList: Adds a project ID to a user's watchlist, preventing duplicates.
+
+ - removeFromWatchList: Removes a project ID from a user's watchlist, if present.
+
+ - getAllProjectsDesc: Retrieves all projects, sorted by creation date in descending order.
+
+ - getProjectById: Fetches a single project by its unique ID.
+
+ - getProjectsByTitle: Retrieves projects with titles matching or partially matching the search term.
+ */
+
+
+
 const files = [
   "business_model",
   "cover",
@@ -31,7 +46,13 @@ const files = [
   "video",
   "whitepaper",
 ];
-
+/**
+ * Adds a new project to the Firestore database.
+ * 
+ * @param {Object} req - The request object containing `user`, project data, and uploaded files.
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object containing the created project ID or an error message.
+ */
 const addProject = async (req, res) => {
   const { user } = req.body;
   if (user) {
@@ -98,7 +119,13 @@ const addProject = async (req, res) => {
     res.status(401).json({ message: "Not logged" });
   }
 };
-
+/**
+ * Updates an existing project in the Firestore database.
+ * 
+ * @param {Object} req - The request object containing `id`, updates, and uploaded files.
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object containing the updated project data or an error message.
+ */
 const updateProject = async (req, res) => {
   const { updates, id } = req.body;
   const ref = doc(datab, "projects", id);
@@ -146,7 +173,13 @@ const updateProject = async (req, res) => {
     res.status(500).json({ message: "Smth went wrong" });
   }
 };
-
+/**
+ * Deletes a project from the Firestore database.
+ * 
+ * @param {Object} req - The request object containing the project ID (`id`).
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object confirming deletion.
+ */
 const deleteProject = async (req, res) => {
   const { id } = req.body;
   const ref = doc(datab, "projects", id);
@@ -154,6 +187,14 @@ const deleteProject = async (req, res) => {
   res.status(200).json({ message: "Deleted" });
 };
 
+
+/**
+ * Adds a project to the watchlist of a specific user.
+ *
+ * @param {Object} req - The request object containing `uid` (user ID) and `proj_id` (project ID).
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object confirming the update or an error message.
+ */
 const addToWatchList = async (req, res) => {
   const { uid, proj_id } = req.body;
 
@@ -173,6 +214,13 @@ const addToWatchList = async (req, res) => {
   }
 };
 
+/**
+ * Removes a project from the watchlist of a specific user.
+ *
+ * @param {Object} req - The request object containing `uid` (user ID) and `proj_id` (project ID).
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object confirming the update or an error message.
+ */
 const removeFromWatchList = async (req, res) => {
   const { uid, proj_id } = req.body;
   try {
@@ -195,7 +243,13 @@ const removeFromWatchList = async (req, res) => {
     res.status(500).json({ message: error });
   }
 };
-
+/**
+ * Retrieves all projects from the Firestore database, sorted in descending order by creation date.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object containing an array of all projects.
+ */
 const getAllProjectsDesc = async (req, res) => {
   const docs = await getDocs(
     query(collection(datab, "projects"), orderBy("created_at", "desc"))
@@ -207,6 +261,13 @@ const getAllProjectsDesc = async (req, res) => {
   res.status(200).json(data);
 };
 
+/**
+ * Retrieves a specific project by its ID.
+ *
+ * @param {Object} req - The request object containing `id` in the request parameters.
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object containing the project data.
+ */
 const getProjectById = async (req, res) => {
   const { id } = req.params;
   const ref = doc(datab, "projects", id);
@@ -214,6 +275,13 @@ const getProjectById = async (req, res) => {
   res.status(200).json({ id: proiect.id, ...proiect.data() });
 };
 
+/**
+ * Retrieves projects from the Firestore database based on a partial or exact match of the title.
+ *
+ * @param {Object} req - The request object containing `title` in the request parameters.
+ * @param {Object} res - The response object used to send the response back to the client.
+ * @returns {Object} A JSON object containing an array of matching projects.
+ */
 const getProjectsByTitle = async (req, res) => {
   const { title } = req.params;
   const ref = collection(datab, "projects");
